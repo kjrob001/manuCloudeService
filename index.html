@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>点菜网页</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      color: #1aad19;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input[type="text"] {
+      width: calc(100% - 22px);
+      padding: 10px;
+      font-size: 16px;
+    }
+    input[type="file"] {
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1aad19;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+    button:hover {
+      background-color: #159d14;
+    }
+    .dish-list {
+      margin-top: 20px;
+    }
+    .dish-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .dish-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      margin-right: 15px;
+      border-radius: 5px;
+    }
+    .random-result {
+      margin-top: 20px;
+      text-align: center;
+      padding: 20px;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .random-result img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>点菜网页</h1>
+  <div class="form-group">
+    <input type="text" id="dishName" placeholder="请输入菜名">
+  </div>
+  <div class="form-group">
+    <input type="file" id="dishImage" accept="image/*">
+  </div>
+  <div class="form-group">
+    <button id="addDishBtn">添加菜品</button>
+  </div>
+  
+  <h2>菜品列表</h2>
+  <div id="dishList" class="dish-list"></div>
+  
+  <div class="form-group">
+    <button id="randomDishBtn">随机选菜</button>
+  </div>
+  
+  <div id="randomResult" class="random-result" style="display: none;">
+    <h2>随机选中的菜</h2>
+    <img id="randomDishImage" src="" alt="选中的菜图片">
+    <p id="randomDishName"></p>
+  </div>
+  
+  <script>
+    // 用于存放菜品的数组，每个菜品包含名称和图片 base64 数据
+    const dishes = [];
+    
+    // 获取页面元素引用
+    const dishNameInput = document.getElementById('dishName');
+    const dishImageInput = document.getElementById('dishImage');
+    const addDishBtn = document.getElementById('addDishBtn');
+    const dishListDiv = document.getElementById('dishList');
+    const randomDishBtn = document.getElementById('randomDishBtn');
+    const randomResultDiv = document.getElementById('randomResult');
+    const randomDishImage = document.getElementById('randomDishImage');
+    const randomDishName = document.getElementById('randomDishName');
+    
+    // 添加菜品函数：读取菜名和图片文件
+    function addDish() {
+      const name = dishNameInput.value.trim();
+      const file = dishImageInput.files[0];
+      
+      if (!name || !file) {
+        alert('请填写菜名并选择图片！');
+        return;
+      }
+      
+      // 使用 FileReader 将图片文件转为 base64 数据
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageSrc = e.target.result;
+        const dish = {
+          name: name,
+          image: imageSrc
+        };
+        dishes.push(dish);
+        renderDishList();
+        
+        // 清空输入框
+        dishNameInput.value = '';
+        dishImageInput.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // 渲染菜品列表
+    function renderDishList() {
+      dishListDiv.innerHTML = '';
+      dishes.forEach((dish, index) => {
+        const dishItem = document.createElement('div');
+        dishItem.className = 'dish-item';
+        
+        const img = document.createElement('img');
+        img.src = dish.image;
+        img.alt = dish.name;
+        
+        const span = document.createElement('span');
+        span.textContent = dish.name;
+        
+        dishItem.appendChild(img);
+        dishItem.appendChild(span);
+        dishListDiv.appendChild(dishItem);
+      });
+    }
+    
+    // 随机选择一个菜品并显示结果
+    function randomDish() {
+      if (dishes.length === 0) {
+        alert('请先添加菜品！');
+        return;
+      }
+      const randomIndex = Math.floor(Math.random() * dishes.length);
+      const selectedDish = dishes[randomIndex];
+      
+      randomDishImage.src = selectedDish.image;
+      randomDishName.textContent = selectedDish.name;
+      randomResultDiv.style.display = 'block';
+    }
+    
+    // 绑定事件
+    addDishBtn.addEventListener('click', addDish);
+    randomDishBtn.addEventListener('click', randomDish);
+  </script>
+</body>
+</html>
