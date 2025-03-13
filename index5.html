@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <!-- 适配手机屏幕 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>点菜网页</title>
+  <style>
+    /* 基础重置 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    /* 整体页面风格 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 10px;
+      background-color: #f2f2f2;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    .container {
+      background-color: rgba(255,255,255,0.95);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 800px;
+      width: 95%;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    input[type="text"],
+    input[type="file"] {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 90%;
+      max-width: 400px;
+      margin: auto;
+      display: block;
+    }
+    button {
+      padding: 10px 20px;
+      background: linear-gradient(45deg, #1aad19, #159d14);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: linear-gradient(45deg, #159d14, #1aad19);
+    }
+    .dish-list {
+      margin-top: 20px;
+    }
+    .dish-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex-wrap: wrap;
+    }
+    .dish-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      margin-right: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .dish-name {
+      margin-right: 10px;
+      white-space: nowrap;
+      font-weight: bold;
+      color: #333;
+      flex-shrink: 0;
+    }
+    .remark-input {
+      flex-grow: 1;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    /* 随机选菜区域 */
+    .random-result {
+      margin-top: 20px;
+      text-align: center;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .random-result img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    /* Modal 样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      padding-top: 60px;
+    }
+    .modal-content {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 700px;
+      border-radius: 8px;
+    }
+    .close {
+      position: absolute;
+      top: 30px;
+      right: 35px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    /* 背景图片自定义样式 */
+    .bg-customize {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    /* 手机屏幕适配调整 */
+    @media (max-width: 480px) {
+      h1, h2 {
+        font-size: 20px;
+      }
+      button, input[type="text"] {
+        font-size: 14px;
+      }
+      .dish-item img {
+        width: 50px;
+        height: 50px;
+      }
+      .random-result img {
+        width: 120px;
+        height: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>点菜网页</h1>
+    <!-- 背景图片自定义 -->
+    <div class="bg-customize form-group">
+      <input type="file" id="bgImage" accept="image/*">
+      <p>选择自定义背景图片</p>
+    </div>
+    <!-- 添加菜品 -->
+    <div class="form-group">
+      <input type="text" id="dishName" placeholder="请输入菜名，如果留空将使用图片文件名">
+    </div>
+    <div class="form-group">
+      <input type="file" id="dishImage" accept="image/*">
+    </div>
+    <div class="form-group">
+      <button id="addDishBtn">添加菜品</button>
+    </div>
+    
+    <h2>菜品列表</h2>
+    <div id="dishList" class="dish-list"></div>
+    
+    <div class="form-group">
+      <button id="randomDishBtn">随机选菜</button>
+    </div>
+    
+    <div id="randomResult" class="random-result" style="display: none;">
+      <h2>随机选中的菜</h2>
+      <img id="randomDishImage" src="" alt="选中的菜图片">
+      <p id="randomDishName"></p>
+    </div>
+    
+    <!-- 放大图片的 Modal -->
+    <div id="modal" class="modal">
+      <span id="closeModal" class="close">&times;</span>
+      <img class="modal-content" id="modalImage" alt="放大图片">
+    </div>
+  </div>
+  
+  <script>
+    // 用于存放菜品数据，每个菜品包含名称、图片（base64 数据）和备注信息
+    const dishes = [];
+    
+    // 获取页面元素引用
+    const dishNameInput = document.getElementById('dishName');
+    const dishImageInput = document.getElementById('dishImage');
+    const addDishBtn = document.getElementById('addDishBtn');
+    const dishListDiv = document.getElementById('dishList');
+    const randomDishBtn = document.getElementById('randomDishBtn');
+    const randomResultDiv = document.getElementById('randomResult');
+    const randomDishImage = document.getElementById('randomDishImage');
+    const randomDishName = document.getElementById('randomDishName');
+    const bgImageInput = document.getElementById('bgImage');
+    
+    // Modal 元素
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+    const closeModal = document.getElementById('closeModal');
+    
+    // 添加菜品函数：读取菜名和图片文件，如果菜名为空，则使用图片文件名（去除扩展名）
+    function addDish() {
+      let name = dishNameInput.value.trim();
+      const file = dishImageInput.files[0];
+      
+      if (!file) {
+        alert('请选择图片！');
+        return;
+      }
+      
+      // 如果用户没有输入菜名，则自动使用文件名（去除扩展名）
+      if (!name) {
+        name = file.name.replace(/\.[^/.]+$/, "");
+      }
+      
+      // 使用 FileReader 将图片文件转为 base64 数据
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageSrc = e.target.result;
+        const dish = {
+          name: name,
+          image: imageSrc,
+          remark: ""
+        };
+        dishes.push(dish);
+        renderDishList();
+        dishNameInput.value = '';
+        dishImageInput.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // 渲染菜品列表，同时绑定图片点击放大和备注输入事件
+    function renderDishList() {
+      dishListDiv.innerHTML = '';
+      dishes.forEach((dish, index) => {
+        const dishItem = document.createElement('div');
+        dishItem.className = 'dish-item';
+        
+        const img = document.createElement('img');
+        img.src = dish.image;
+        img.alt = dish.name;
+        // 点击图片显示放大视图
+        img.addEventListener('click', function() {
+          showModal(dish.image);
+        });
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'dish-name';
+        nameSpan.textContent = dish.name;
+        
+        // 备注输入框
+        const remarkInput = document.createElement('input');
+        remarkInput.type = 'text';
+        remarkInput.className = 'remark-input';
+        remarkInput.placeholder = '输入备注';
+        remarkInput.value = dish.remark;
+        remarkInput.addEventListener('input', function(e) {
+          dish.remark = e.target.value;
+        });
+        
+        dishItem.appendChild(img);
+        dishItem.appendChild(nameSpan);
+        dishItem.appendChild(remarkInput);
+        dishListDiv.appendChild(dishItem);
+      });
+    }
+    
+    // 随机选择一个菜品并显示结果
+    function randomDish() {
+      if (dishes.length === 0) {
+        alert('请先添加菜品！');
+        return;
+      }
+      const randomIndex = Math.floor(Math.random() * dishes.length);
+      const selectedDish = dishes[randomIndex];
+      
+      randomDishImage.src = selectedDish.image;
+      randomDishName.textContent = selectedDish.name + (selectedDish.remark ? (" - 备注：" + selectedDish.remark) : "");
+      randomResultDiv.style.display = 'block';
+      randomDishImage.addEventListener('click', function() {
+        showModal(selectedDish.image);
+      });
+    }
+    
+    // 显示放大图片的 Modal
+    function showModal(imageSrc) {
+      modal.style.display = 'block';
+      modalImage.src = imageSrc;
+    }
+    
+    // 关闭 Modal
+    function hideModal() {
+      modal.style.display = 'none';
+    }
+    
+    // 背景图片自定义：读取文件并更新 body 背景
+    bgImageInput.addEventListener('change', function() {
+      const file = bgImageInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.body.style.backgroundImage = `url(${e.target.result})`;
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // 绑定事件
+    addDishBtn.addEventListener('click', addDish);
+    randomDishBtn.addEventListener('click', randomDish);
+    closeModal.addEventListener('click', hideModal);
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        hideModal();
+      }
+    });
+  </script>
+</body>
+</html>
